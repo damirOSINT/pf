@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>DARKNET UPLINK</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        :root { --bg: #050505; --card-bg: #111; --red: #ff3333; --green: #00ff41; --text: #e0e0e0; --border: #333; --gold: #ffd700; }
+        body { background: var(--bg); color: var(--text); font-family: monospace; margin: 0; padding-bottom: 80px; -webkit-tap-highlight-color: transparent; }
+        .header { padding: 20px; border-bottom: 1px solid var(--red); background: linear-gradient(180deg, rgba(20,0,0,0.9), rgba(0,0,0,0)); display: flex; justify-content: space-between; align-items: center; }
+        .glitch { font-size: 20px; font-weight: 900; color: var(--text); text-shadow: 2px 2px var(--red); letter-spacing: 2px; }
+        .tabs { display: flex; gap: 10px; padding: 15px; overflow-x: auto; }
+        .tab { background: #1a1a1a; padding: 10px 20px; border-radius: 4px; font-weight: bold; border: 1px solid #444; color: #888; white-space: nowrap; transition: 0.2s; }
+        .tab.active { background: var(--red); color: #fff; border-color: var(--red); box-shadow: 0 0 10px rgba(255, 51, 51, 0.4); }
+        .section { display: none; padding: 0 15px; animation: fadeIn 0.3s; }
+        .section.active { display: block; }
+        .card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; padding: 15px; margin-bottom: 15px; position: relative; overflow: hidden; }
+        .card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: #444; }
+        .card.promo::before { background: var(--red); box-shadow: 0 0 8px var(--red); }
+        .card.own::before { background: var(--green); box-shadow: 0 0 8px var(--green); }
+        .card.npc::before { background: var(--gold); box-shadow: 0 0 8px var(--gold); }
+        .row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+        .badge { font-size: 10px; padding: 3px 6px; border-radius: 4px; background: #333; font-weight: bold; }
+        .badge.fire { background: var(--red); color: white; }
+        .badge.npc { background: var(--gold); color: black; }
+        .btn { width: 100%; border: none; padding: 14px; font-weight: bold; border-radius: 4px; cursor: pointer; margin-top: 10px; }
+        .btn-red { background: rgba(255, 51, 51, 0.15); color: var(--red); border: 1px solid var(--red); }
+        .btn-green { background: rgba(0, 255, 65, 0.15); color: var(--green); border: 1px solid var(--green); }
+        .btn-gold { background: rgba(255, 215, 0, 0.15); color: var(--gold); border: 1px solid var(--gold); }
+        .btn-gray { background: #222; color: #888; border: 1px solid #444; }
+        .btn-mini { padding: 6px 12px; width: auto; font-size: 11px; margin: 0; }
+        .modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.95); z-index: 200; display: none; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
+        .modal-content { background: #1a1a1a; padding: 25px; border: 1px solid var(--border); width: 85%; max-width: 400px; border-radius: 12px; }
+        .input-dark { width: 90%; background: #0a0a0a; border: 1px solid #333; padding: 12px; color: #fff; margin-top: 5px; font-family: monospace; border-radius: 6px; }
+        textarea.input-dark { resize: none; height: 60px; }
+        .stars-selector { display: flex; gap: 5px; margin: 10px 0; justify-content: center; }
+        .star { font-size: 24px; cursor: pointer; color: #444; transition: 0.2s; }
+        .star.active { color: var(--gold); }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div><div class="glitch">DARKNET</div><div style="font-size: 10px; color: #666;">v2.1.0 [SECURE]</div></div>
+        <div style="font-size: 10px; color: var(--green);">● CONNECTED</div>
+    </div>
+    <div class="tabs">
+        <div class="tab active" onclick="sw('vpn', this)">VPN Каталог</div>
+        <div class="tab" onclick="sw('chips', this)">Чипы DNP</div>
+        <div class="tab" onclick="sw('fabricant', this)">Fabricant</div>
+        <div class="tab" onclick="sw('my_vpn', this)">Мой Сервис</div>
+    </div>
+
+    <div id="vpn" class="section active">
+        <div id="vpn-list" style="padding-top:10px; text-align: center; color: #666;">Загрузка данных...</div>
+    </div>
+
+    <div id="chips" class="section">
+        <div class="card"><div class="row"><b>DNP-401</b><div class="badge">x1.1</div></div><div>Базовый модуль.</div><div class="row" style="margin-top:15px;"><div style="color:var(--green)">2,000,000 ⭐</div></div><button class="btn btn-red" onclick="buy('DNP-401')">Купить</button></div>
+        <div class="card"><div class="row"><b>DNP-512</b><div class="badge">x1.4</div></div><div>Стандарт рынка.</div><div class="row" style="margin-top:15px;"><div style="color:var(--green)">5,000,000 ⭐</div></div><button class="btn btn-red" onclick="buy('DNP-512')">Купить</button></div>
+        <div class="card"><div class="row"><b>DNP-620</b><div class="badge">x1.7</div></div><div>Продвинутый.</div><div class="row" style="margin-top:15px;"><div style="color:var(--green)">12,000,000 ⭐</div></div><button class="btn btn-red" onclick="buy('DNP-620')">Купить</button></div>
+        <div class="card promo"><div class="row"><b style="color:var(--red)">DNP-720</b><div class="badge fire">x2.0</div></div><div>Максимальная мощь.</div><div class="row" style="margin-top:15px;"><div style="color:var(--red)">25,000,000 ⭐</div></div><button class="btn btn-red" style="background:var(--red);color:#fff" onclick="buy('DNP-720')">Купить MAX</button></div>
+    </div>
+
+    <div id="fabricant" class="section">
+        <div id="fab-active" style="display:none;">
+            <div class="card npc">
+                <div class="row"><b style="color:var(--gold)">👤 FABRICANT</b><div class="badge npc">NPC</div></div>
+                <div style="font-size:32px; color:var(--gold); text-align:center; margin:15px 0;" id="fab-timer">00:00</div>
+                <div style="font-size:12px; color:#aaa">"Я могу перепрошить твой чип. Это рискованно."</div>
+                <button class="btn btn-gold" onclick="buyKey()">КУПИТЬ КЛЮЧ (500k)</button>
+            </div>
+        </div>
+        <div id="fab-inactive" style="text-align:center; padding:50px; color:#555; border:1px dashed #333; margin-top:20px; border-radius:8px;">
+            <div style="font-size:40px">🕵️‍♂️</div><br>Fabricant скрывается.<br>
+            <span style="font-size:10px;">Появляется случайно с 10:00 до 20:00</span>
+        </div>
+    </div>
+
+    <div id="my_vpn" class="section">
+        <div id="no-vpn-panel">
+            <div class="card own">
+                <div class="row"><b style="color:var(--green)">ЗАПУСК VPN</b></div>
+                <div style="font-size:12px; color:#aaa; margin-bottom:15px;">Станьте провайдером. Пассивный доход.</div>
+                <button class="btn btn-green" onclick="document.getElementById('create-modal').style.display='flex'">Создать (30кк)</button>
+            </div>
+        </div>
+        <div id="vpn-owner-panel" style="display:none;">
+            <div class="card own">
+                <div class="row"><b id="mv-name" style="color:var(--green)">...</b><div class="badge" id="mv-freq">...</div></div>
+                <div style="display:flex; justify-content:space-between; margin:15px 0; text-align:center;">
+                    <div><div style="font-size:10px;color:#888">АБОНЕНТЫ</div><b id="mv-users">0</b></div>
+                    <div><div style="font-size:10px;color:#888">СЕРВЕРЫ</div><b id="mv-servers">1</b></div>
+                    <div><div style="font-size:10px;color:#888">БАЛАНС</div><b id="mv-bal">0</b></div>
+                </div>
+                <button class="btn btn-green" onclick="send('open_terminal_owner')">📟 ТЕРМИНАЛ</button>
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top:10px;">
+                    <button class="btn btn-gray btn-mini" onclick="upgrade('server')">➕ СЕРВЕР (20кк)</button>
+                    <button class="btn btn-gray btn-mini" onclick="upgrade('promo')">🔥 PROMO (10кк)</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="create-modal" class="modal">
+        <div class="modal-content">
+            <h3>Создание VPN</h3>
+            <input type="text" id="new-vpn-name" class="input-dark" placeholder="Название..." maxlength="15">
+            <input type="number" id="new-vpn-price" class="input-dark" placeholder="Цена (за 2 дня)">
+            <div style="margin-top:20px; display:flex; gap:10px;">
+                <button class="btn btn-gray" onclick="document.getElementById('create-modal').style.display='none'">Отмена</button>
+                <button class="btn btn-green" onclick="submitCreate()">ЗАПУСТИТЬ</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="review-modal" class="modal">
+        <div class="modal-content">
+            <h3>Оставить отзыв</h3>
+            <div class="stars-selector" id="star-container">
+                <span class="star" onclick="setStars(1)">★</span>
+                <span class="star" onclick="setStars(2)">★</span>
+                <span class="star" onclick="setStars(3)">★</span>
+                <span class="star" onclick="setStars(4)">★</span>
+                <span class="star" onclick="setStars(5)">★</span>
+            </div>
+            <textarea id="review-text" class="input-dark" placeholder="Ваш отзыв (макс 120 симв)..." maxlength="120"></textarea>
+            <input type="hidden" id="review-target-id">
+            <div style="margin-top:20px; display:flex; gap:10px;">
+                <button class="btn btn-gray" onclick="document.getElementById('review-modal').style.display='none'">Отмена</button>
+                <button class="btn btn-green" onclick="submitReview()">Отправить</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+        let data = {};
+        let currentStars = 5;
+        
+        try { 
+            const raw = window.location.hash.slice(1);
+            if(raw.startsWith('data=')) data = JSON.parse(decodeURIComponent(raw.replace('data=', '')));
+        } catch(e) { console.error(e); }
+
+        function init() {
+            // VPN List
+            const list = document.getElementById('vpn-list');
+            if(data.vpns && data.vpns.length) {
+                list.innerHTML = data.vpns.map(v => `
+                    <div class="card ${v.promoted?'promo':''}">
+                        <div class="row">
+                            <div>${v.promoted?'🔥 ':''}<b>${v.name}</b></div>
+                            <div class="badge">${v.freq} MHz</div>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; font-size:12px; margin-top:5px; color:#888;">
+                            <span>⭐ ${v.rating.toFixed(1)}</span><span>👥 ${v.users}/${v.max}</span>
+                        </div>
+                        <div class="row" style="margin-top:10px;"><div style="color:var(--green)">${v.price} ⭐</div></div>
+                        <div style="display:flex; gap:5px;">
+                            <button class="btn btn-gray btn-mini" style="flex:1" onclick="navigator.clipboard.writeText('${v.id}');tg.showPopup({message:'ID скопирован'})">ID: ${v.id}</button>
+                            <button class="btn btn-gray btn-mini" style="flex:1" onclick="openReview(${v.id})">ОТЗЫВ</button>
+                            <button class="btn ${v.users>=v.max?'btn-gray':'btn-green'} btn-mini" style="flex:2" onclick="${v.users>=v.max?'':'sub('+v.id+',\''+v.name+'\','+v.price+')'}">${v.users>=v.max?'FULL':'ПОДКЛЮЧИТЬ'}</button>
+                        </div>
+                    </div>
+                `).join('');
+            } else list.innerHTML = '<div style="margin-top:20px; color:#555">Нет сервисов</div>';
+
+            // Owner Panel
+            if(data.my_vpn) {
+                document.getElementById('no-vpn-panel').style.display='none';
+                document.getElementById('vpn-owner-panel').style.display='block';
+                document.getElementById('mv-name').innerText = data.my_vpn.name;
+                document.getElementById('mv-freq').innerText = data.my_vpn.freq;
+                document.getElementById('mv-users').innerText = data.my_vpn.users + '/' + (data.my_vpn.servers*8);
+                document.getElementById('mv-servers').innerText = data.my_vpn.servers;
+                document.getElementById('mv-bal').innerText = data.my_vpn.balance;
+            }
+
+            // Fabricant
+            if(data.fab_time > 0) {
+                document.getElementById('fab-active').style.display='block';
+                document.getElementById('fab-inactive').style.display='none';
+                startTimer(data.fab_time);
+            }
+        }
+
+        function sw(id, el) {
+            document.querySelectorAll('.section').forEach(e => e.classList.remove('active'));
+            document.querySelectorAll('.tab').forEach(e => e.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            el.classList.add('active');
+        }
+
+        function startTimer(s) {
+            const el = document.getElementById('fab-timer');
+            const i = setInterval(() => { s--; let m=Math.floor(s/60); let sec=s%60; el.innerText = `${m}:${sec<10?'0'+sec:sec}`; if(s<=0) clearInterval(i); }, 1000);
+        }
+
+        // Review Logic
+        function openReview(id) {
+            document.getElementById('review-target-id').value = id;
+            document.getElementById('review-modal').style.display = 'flex';
+            setStars(5);
+        }
+        function setStars(n) {
+            currentStars = n;
+            const stars = document.querySelectorAll('.star');
+            stars.forEach((s, i) => {
+                if(i < n) s.classList.add('active');
+                else s.classList.remove('active');
+            });
+        }
+        function submitReview() {
+            const id = document.getElementById('review-target-id').value;
+            const text = document.getElementById('review-text').value;
+            if(!text) return;
+            send('add_review', { vpn_id: id, stars: currentStars, text: text });
+        }
+
+        function send(type, payload={}) { tg.sendData(JSON.stringify({type, ...payload})); tg.close(); }
+        function buy(model) { tg.showPopup({title:'Покупка', message:`Купить ${model}?`, buttons:[{type:'ok', id:'y'},{type:'cancel'}]}, (btn)=>{if(btn==='y') send('buy_chip', {model})}); }
+        function sub(id, name, price) { tg.showPopup({title:'Подписка', message:`${name}\n${price} ⭐ / 2 дня`, buttons:[{type:'ok', id:'y'},{type:'cancel'}]}, (btn)=>{if(btn==='y') send('sub_vpn', {id})}); }
+        function buyKey() { tg.showPopup({title:'Fabricant', message:`Купить ключ (500k)?`, buttons:[{type:'ok', id:'y'},{type:'cancel'}]}, (btn)=>{if(btn==='y') send('buy_key')}); }
+        function submitCreate() { const n=document.getElementById('new-vpn-name').value; const p=document.getElementById('new-vpn-price').value; if(n&&p) send('create_vpn', {name:n, price:p}); }
+        function upgrade(type) { send('upgrade_vpn', {upgrade:type}); }
+
+        init();
+    </script>
+</body>
+</html>
